@@ -6,9 +6,11 @@ use App\Repository\CarRepository;
 use App\Entity\Car;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CarController extends AbstractController
 {
@@ -55,8 +57,8 @@ class CarController extends AbstractController
         return new JsonResponse($dataCar);
     }
 
-    #[Route('/car/edit/{id}', name: 'car.edit', methods:['GET', 'POST'])]
-    public function edit(CarRepository $repository, Request $request, EntityManagerInterface $manager, int $id): JsonResponse
+    #[Route('/car/edit/{id}', name: 'car.edit', methods:['GET', 'PUT'])]
+    public function edit(CarRepository $repository, Request $request, EntityManagerInterface $manager, int $id, SluggerInterface $slugger): JsonResponse
     {
         $dataCar = json_decode($request->getContent(), true);
 
@@ -88,9 +90,23 @@ class CarController extends AbstractController
         {
             $editCar->setCarburant($dataCar['carburant']);
         }
-        if(isset($dataCar['image'])) 
-        {
-            $editCar->setCarburant($dataCar['image']);
+        
+        if($request->files->has('image')){
+            $imageFile = $request->files->get('image');
+            $originalFileName = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFileName = $slugger->slug($originalFileName);
+            $newFileName = $safeFileName.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+            try {
+                $imageFile->move(
+                    $this->getParameter('images_cars'),
+                    $newFileName
+                );
+                $editCar->setImage($newFileName);
+            } catch (FileException $ex) {
+                return new JsonResponse(['error' => 'Failed to upload image']);
+            }
+
         }
 
         $manager->persist($editCar);
