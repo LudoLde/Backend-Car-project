@@ -91,6 +91,31 @@ class CarController extends AbstractController
             $editCar->setCarburant($dataCar['carburant']);
         }
         
+        
+
+        $manager->persist($editCar);
+    $manager->flush();
+
+        return new JsonResponse('Car has been edited');
+    }
+}
+
+#[Route('/car/create', name: 'car.create', methods:['POST'])]
+public function create(EntityManagerInterface $manager, Request $request, SluggerInterface $slugger): JsonResponse
+{
+    
+    // $dataCar = json_decode($request->getContent(), true);
+
+    $newCar = new Car();
+
+        $newCar->setMarque($request->request->get('marque'));
+        $newCar->setModele($request->request->get('modele'));
+        $newCar->setAnneeModele($request->request->get('annee_modele'));
+        $newCar->setBoiteVitesse($request->request->get('boite_vitesse'));
+        $newCar->setBoiteVitesse($request->request->get('boite_vitesse'));
+        $newCar->setCarburant($request->request->get('carburant'));
+
+    /** @var UploadFile $imageFile **/
         if($request->files->has('image')){
             $imageFile = $request->files->get('image');
             $originalFileName = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -102,57 +127,11 @@ class CarController extends AbstractController
                     $this->getParameter('images_cars'),
                     $newFileName
                 );
-                $editCar->setImage($newFileName);
+                $newCar->setImage($newFileName);
             } catch (FileException $ex) {
                 return new JsonResponse(['error' => 'Failed to upload image']);
             }
-
         }
-
-        $manager->persist($editCar);
-    $manager->flush();
-
-        return new JsonResponse('Car has been edited');
-    }
-}
-
-#[Route('/car/create', name: 'car.create', methods:['POST'])]
-public function create(EntityManagerInterface $manager, Request $request): JsonResponse
-{
-
-    
-    $dataCar = json_decode($request->getContent(), true);
-
-    $newCar = new Car();
-
-    if(isset($dataCar['marque'])) 
-    {
-        $newCar->setMarque($dataCar['marque']);
-    }
-    if(isset($dataCar['modele'])) 
-    {
-        $newCar->setModele($dataCar['modele']);
-    }
-    if(isset($dataCar['annee_modele'])) 
-    {
-        $newCar->setAnneeModele($dataCar['annee_modele']);
-    }
-    if(isset($dataCar['boite_vitesse'])) 
-    {
-        $newCar->setBoiteVitesse($dataCar['boite_vitesse']);
-    }
-    if(isset($dataCar['boite_vitesse'])) 
-    {
-        $newCar->setBoiteVitesse($dataCar['boite_vitesse']);
-    }
-    if(isset($dataCar['carburant'])) 
-    {
-        $newCar->setCarburant($dataCar['carburant']);
-    }
-    if(isset($dataCar['image'])) 
-    {
-        $newCar->setCarburant($dataCar['image']);
-    }
 
     $manager->persist($newCar);
     $manager->flush();
