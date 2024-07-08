@@ -2,23 +2,23 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Car;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Faker;
 
 
 class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        $faker = Faker\Factory::create();
         for ($i=0; $i < 10; $i++) { 
-            $car = new Car();
-            $car->setMarque('Hyundai')
-                ->setModele('i20')
-                ->setAnneeModele(mt_rand(2020, 2024))
-                ->setBoiteVitesse(mt_rand(0,1)== 1 ? 'Automatique': 'Manuelle')
-                ->setCarburant(mt_rand(0,1)== 1 ? 'Essence': 'Diesel');
-         $manager->persist($car);
+            $user = new User();
+            $user->setEmail($faker->email())
+                ->setRoles(['ROLE_USER'])
+                ->setPassword($faker->word());
+         $manager->persist($user);
         }
         
         $manager->flush();
