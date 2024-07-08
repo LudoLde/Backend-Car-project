@@ -28,7 +28,7 @@ class CarController extends AbstractController
                 'annee_modele' => $car->getAnneeModele(),
                 'boite_vitesse' => $car->getBoiteVitesse(),
                 'carburant' => $car->getCarburant(),
-                'image' => $car->getImage(),
+                'image' => 'http://127.0.0.1:8000/images_cars/'. $car->getImage(),
                 'createdAt' => $car->getCreatedAt()->format(\DateTime::ATOM)
             ];
             
@@ -50,9 +50,9 @@ class CarController extends AbstractController
                 'annee_modele' => $car->getAnneeModele(),
                 'boite_vitesse' => $car->getBoiteVitesse(),
                 'carburant' => $car->getCarburant(),
-                'image' => $car->getImage(),
+                'image' => 'http://127.0.0.1:8000/images_cars/'. $car->getImage(),
                 'createdAt' => $car->getCreatedAt()->format(\DateTime::ATOM)
-            ];  
+            ]; 
         }
         return new JsonResponse($dataCar);
     }
@@ -112,7 +112,6 @@ public function create(EntityManagerInterface $manager, Request $request, Slugge
         $newCar->setModele($request->request->get('modele'));
         $newCar->setAnneeModele($request->request->get('annee_modele'));
         $newCar->setBoiteVitesse($request->request->get('boite_vitesse'));
-        $newCar->setBoiteVitesse($request->request->get('boite_vitesse'));
         $newCar->setCarburant($request->request->get('carburant'));
 
     /** @var UploadFile $imageFile **/
@@ -124,7 +123,7 @@ public function create(EntityManagerInterface $manager, Request $request, Slugge
 
             try {
                 $imageFile->move(
-                    $this->getParameter('images_cars'),
+                    $this->getParameter('images_directory'),
                     $newFileName
                 );
                 $newCar->setImage($newFileName);
